@@ -9,5 +9,6 @@ urlpatterns = [
     path('email_elements/', views.email_element_list, name='email_element_list'),
     path('email_elements/<int:pk>/', views.email_element_detail,
          name='email_element_detail'),
+    path('send_email', views.send_email)
 
 ]

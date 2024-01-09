@@ -3,11 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import EmailTemplate, EmailElement
 from .serializers import EmailTemplateSerializer, EmailElementSerializer
-
+from django.core.mail import send_mail
+from django.conf import settings
 # EmailTemplate views
 
+
 @api_view(['GET', 'POST'])
-def email_template_list(request,id):
+def email_template_list(request, id):
     if request.method == 'GET':
         templates = EmailTemplate.objects.filter(company=id)
         serializer = EmailTemplateSerializer(templates, many=True)
@@ -19,6 +21,7 @@ def email_template_list(request,id):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def email_template_detail(request, pk):
@@ -59,6 +62,7 @@ def email_element_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET', 'PUT', 'DELETE'])
 def email_element_detail(request, pk):
     try:
@@ -80,3 +84,21 @@ def email_element_detail(request, pk):
     elif request.method == 'DELETE':
         element.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+def send_email(request):
+
+    try:
+        send_mail(
+            subject=request.data['subject'],
+            message=request.data['message'],
+            # Replace with your sender email
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=request.data['recipient_list'],
+            fail_silently=False,
+        )
+        return Response('Emails sent!')
+    except Exception as e:
+
+        return Response(f"Error sending email: {str(e)}")

@@ -141,3 +141,5 @@ def employee_detail(request, company_id, employee_id):
         # Delete a specific employee
         employee.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
