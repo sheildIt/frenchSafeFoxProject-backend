@@ -5,13 +5,18 @@ from .models import EmailTemplate, EmailElement
 from .serializers import EmailTemplateSerializer, EmailElementSerializer
 from django.core.mail import send_mail
 from django.conf import settings
+
+
 # EmailTemplate views
-
-
 @api_view(['GET', 'POST'])
 def email_template_list(request, id):
     if request.method == 'GET':
-        templates = EmailTemplate.objects.filter(company=id)
+        is_live = request.GET.get('is_live', None)
+        if is_live is not None:
+            templates = EmailTemplate.objects.filter(
+                company=id, is_live=is_live)
+        else:
+            templates = EmailTemplate.objects.filter(company=id)
         serializer = EmailTemplateSerializer(templates, many=True)
         return Response(serializer.data)
 
@@ -87,7 +92,9 @@ def email_element_detail(request, pk):
 
 
 @api_view(['POST'])
-def send_email(request):
+def send_email(request, id):
+
+    email_obj = EmailTemplate.objects.get(id=id)
 
     try:
         send_mail(
@@ -98,6 +105,10 @@ def send_email(request):
             recipient_list=request.data['recipient_list'],
             fail_silently=False,
         )
+
+        email_obj.is_live = True
+        email_obj.save()
+
         return Response('Emails sent!')
     except Exception as e:
 
