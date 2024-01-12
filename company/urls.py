@@ -22,6 +22,6 @@ urlpatterns = [
     # Employees
     re_path(r'^employees_list/(?P<id>\d+)/$',
             EmployeeListView.as_view()),
-    path('api/employees/<str:id>/<str:employee_id>/',
+    path('api/employees/<str:company_id>/<str:employee_id>/',
          views.employee_detail),
 ]

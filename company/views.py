@@ -119,8 +119,8 @@ class EmployeeListView(ListAPIView):
 @api_view(['GET', 'PUT', 'DELETE'])
 def employee_detail(request, company_id, employee_id):
     try:
-        employee = Employee.objects.get(company=company_id, id=employee_id)
-
+        employee = Employee.objects.filter(company=company_id, id=employee_id).first()
+        print(company_id, employee_id)
     except Employee.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

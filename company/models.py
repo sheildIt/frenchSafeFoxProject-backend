@@ -36,7 +36,8 @@ class Departments(models.Model):
     color = models.CharField(
         max_length=7, default='color')
     incidents = models.IntegerField(default=0)
-
+    number_of_employees = models.IntegerField(default=0)
+    
     def save(self, *args, **kwargs):
         def color_lambda():
             return random.choice(self.color_choices)
