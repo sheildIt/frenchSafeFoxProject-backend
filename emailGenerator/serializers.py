@@ -1,14 +1,20 @@
 from rest_framework import serializers
-from .models import EmailTemplate, EmailElement
+from .models import EmailDocument, EmailElement, SentEmail
 
 
-class EmailTemplateSerializer(serializers.ModelSerializer):
+class EmailDocumentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = EmailTemplate
+        model = EmailDocument
         fields = '__all__'
 
 
 class EmailElementSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailElement
+        fields = '__all__'
+
+
+class SentEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SentEmail
         fields = '__all__'

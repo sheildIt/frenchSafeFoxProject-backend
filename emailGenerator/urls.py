@@ -9,6 +9,10 @@ urlpatterns = [
     path('email_elements/', views.email_element_list, name='email_element_list'),
     path('email_elements/<int:pk>/', views.email_element_detail,
          name='email_element_detail'),
-    path('send_email/<str:id>', views.send_email)
+    path('send_email/<str:id>', views.send_email),
+    path('schedule_email/<str:id>', views.schedule_email),
+
+
+    path('live_emails', views.get_sent_emails)
 
 ]
