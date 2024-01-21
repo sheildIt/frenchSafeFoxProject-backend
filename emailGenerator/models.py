@@ -1,6 +1,21 @@
 from django.db import models
-from company.models import Company, UseScenario, Departments
+from company.models import Company, Departments
 import uuid
+
+
+class UseScenario(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    name = models.CharField(max_length=25)
+    created_at = models.DateField(auto_now_add=True)
+    title = models.CharField(max_length=255)
+    scenario = models.TextField(
+        help_text='Write a scenario where an email will be sent..')
+    POI = models.CharField(max_length=255, help_text='Person of Interest')
+    poi_email = models.EmailField()
+    link_field = models.URLField(default=None, blank=True, null=True)
+
+    def __str__(self):
+        return self.title
 
 
 class EmailDocument(models.Model):
@@ -9,13 +24,22 @@ class EmailDocument(models.Model):
         ('Type2', 'Phishing Email'),
         # Add more template types as needed
     ]
+    EMAIL_TYPE_CHOICES = [
+        ("PROMOTIONAL", 'Promotional'),
+        ("COLD", 'Cold'),
+        ("OTHER", 'Other'),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     template_type = models.CharField(
         max_length=50, choices=TEMPLATE_TYPE_CHOICES)
+    email_type = models.CharField(
+        max_length=25, choices=EMAIL_TYPE_CHOICES)
     email_theme = models.CharField(max_length=40)
     email_subjectline = models.CharField(max_length=50)
     email_body = models.TextField()
+    friendly_url = models.CharField(max_length=150, blank=True, null=True)
+    tracking_link = models.URLField(default=None, blank=True, null=True)
     scenario = models.ForeignKey(
         UseScenario, on_delete=models.SET_NULL, null=True)
     scheduled = models.BooleanField(default=False)
@@ -58,3 +82,9 @@ class SentEmail(models.Model):
     image_clicks = models.IntegerField(default=0)
     CTA_clicks = models.IntegerField(default=0)
     reported = models.IntegerField(default=0)
+
+
+class News(models.Model):
+
+    headline = models.CharField(max_length=40)
+    article_text = models.TextField()

@@ -13,21 +13,6 @@ class Company(models.Model):
         return self.company_name
 
 
-class UseScenario(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    name = models.CharField(max_length=25)
-    created_at = models.DateField(auto_now_add=True)
-    title = models.CharField(max_length=255)
-    scenario = models.TextField(
-        help_text='Write a scenario where email will be sent..')
-    POI = models.CharField(max_length=255, help_text='person of interest')
-    poi_email = models.EmailField()
-    link_field = models.URLField(default=None, blank=True, null=True)
-
-    def __str__(self):
-        return self.title
-
-
 class Departments(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     department_name = models.CharField(max_length=40)
@@ -37,7 +22,7 @@ class Departments(models.Model):
         max_length=7, default='color')
     incidents = models.IntegerField(default=0)
     number_of_employees = models.IntegerField(default=0)
-    
+
     def save(self, *args, **kwargs):
         def color_lambda():
             return random.choice(self.color_choices)
