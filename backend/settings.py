@@ -141,6 +141,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_IMPORTS = ("emailGenerator.tasks", )
+CELERY_BROKER_URL = os.environ.get('REDIS_URL')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')
+CELERY_CACHE_BACKEND = 'default'
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 

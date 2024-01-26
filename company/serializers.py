@@ -1,4 +1,4 @@
-from .models import Company, UseScenario, Departments, Employee
+from .models import Company, Departments, Employee
 from rest_framework.serializers import ModelSerializer
 
 
@@ -7,13 +7,6 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = ['id', 'company_name', 'departments_list']
-
-
-class UseScenarioSerializer(ModelSerializer):
-    class Meta:
-        model = UseScenario
-        fields = ['id', 'title', 'scenario',
-                  'POI', 'poi_email', 'name', 'created_at', 'company']
 
 
 class DepartmentsSerializer(ModelSerializer):

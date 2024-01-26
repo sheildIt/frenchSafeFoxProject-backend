@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Company, UseScenario, Departments, Employee
-from .serializers import CompanySerializer, UseScenarioSerializer, DepartmentsSerializer, EmployeeSerializer
+from .models import Company, Departments, Employee
+from .serializers import CompanySerializer, DepartmentsSerializer, EmployeeSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -41,50 +41,6 @@ def register_company(request):
     return Response({'detail': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-"""SCENARIO VIEWS"""
-
-
-@api_view(['GET'])
-def get_all_use_scenarios(request, id):
-    scenarios = UseScenario.objects.filter(company=id)
-    serializer = UseScenarioSerializer(scenarios, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-def get_use_scenario(request, scenario_id):
-    scenario = UseScenario.objects.get(id=scenario_id)
-    serializer = UseScenarioSerializer(scenario)
-    return Response(serializer.data)
-
-
-@api_view(['POST'])
-def create_use_scenario(request):
-    print(request.data)
-    serializer = UseScenarioSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-def update_use_scenario(request, scenario_id):
-    scenario = UseScenario.objects.get(id=scenario_id)
-    serializer = UseScenarioSerializer(instance=scenario, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-def delete_use_scenario(request, scenario_id):
-    scenario = UseScenario.objects.get(id=scenario_id)
-    scenario.delete()
-    return Response({"message": "Scenario deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-
-
 """DEPARTMENTS views"""
 
 
@@ -119,7 +75,8 @@ class EmployeeListView(ListAPIView):
 @api_view(['GET', 'PUT', 'DELETE'])
 def employee_detail(request, company_id, employee_id):
     try:
-        employee = Employee.objects.filter(company=company_id, id=employee_id).first()
+        employee = Employee.objects.filter(
+            company=company_id, id=employee_id).first()
         print(company_id, employee_id)
     except Employee.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
