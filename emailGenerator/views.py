@@ -38,9 +38,9 @@ def email_template_list(request, id):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def email_template_detail(request, pk):
+def email_template_detail(request, id):
     try:
-        template = EmailDocument.objects.get(pk=pk)
+        template = EmailDocument.objects.get(id=id)
     except EmailDocument.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -64,10 +64,13 @@ def email_template_detail(request, pk):
 
 
 @api_view(['GET', 'POST'])
-def email_element_list(request):
+def email_element_list(request, id):
     if request.method == 'GET':
-        elements = EmailElement.objects.all()
-        serializer = EmailElementSerializer(elements, many=True)
+        email_document = EmailDocument.objects.get(id=id)
+
+        serializer = EmailElementSerializer(
+            email_document.email_elements, many=True)
+
         return Response(serializer.data)
 
     elif request.method == 'POST':
@@ -87,10 +90,12 @@ def email_element_detail(request, pk):
 
     if request.method == 'GET':
         serializer = EmailElementSerializer(element)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        serializer = EmailElementSerializer(element, data=request.data)
+        serializer = EmailElementSerializer(
+            element, data=request.data, partial=True)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -156,7 +161,7 @@ def schedule_email(request, id):
     try:
         email_obj = EmailDocument.objects.get(id=id)
         email_info = request.data
-        print(email_obj.id)
+
         scheduled_time = datetime.fromisoformat(
             str(request.data['scheduled_time']))
         scheduled_time_utc = pytz.timezone(
@@ -193,7 +198,7 @@ def get_use_scenario(request, scenario_id):
 
 @api_view(['POST'])
 def create_use_scenario(request):
-    print(request.data)
+
     serializer = UseScenarioSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()

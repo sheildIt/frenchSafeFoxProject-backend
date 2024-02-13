@@ -18,6 +18,13 @@ class UseScenario(models.Model):
         return self.title
 
 
+class EmailElement(models.Model):
+    email_subjectline = models.CharField(max_length=50)
+    email_text = models.TextField()
+    image = models.ImageField(null=True, blank=True)
+    button = models.CharField(max_length=50, null=True, blank=True)
+
+
 class EmailDocument(models.Model):
     TEMPLATE_TYPE_CHOICES = [
         ('Type1', 'Standard Email'),
@@ -36,8 +43,7 @@ class EmailDocument(models.Model):
     email_type = models.CharField(
         max_length=25, choices=EMAIL_TYPE_CHOICES)
     email_theme = models.CharField(max_length=40)
-    email_subjectline = models.CharField(max_length=50)
-    email_body = models.TextField()
+    email_elements = models.ManyToManyField('EmailElement')
     friendly_url = models.CharField(max_length=150, blank=True, null=True)
     tracking_link = models.URLField(default=None, blank=True, null=True)
     scenario = models.ForeignKey(
@@ -48,25 +54,7 @@ class EmailDocument(models.Model):
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.email_subjectline} - {self.created_at}"
-
-
-class EmailElement(models.Model):
-    ELEMENT_TYPE_CHOICES = [
-        ('TypeA', 'Type A'),
-        ('TypeB', 'Type B'),
-        # Add more element types as needed
-    ]
-
-    email_template = models.ForeignKey(EmailDocument, on_delete=models.CASCADE)
-    element_type = models.CharField(
-        max_length=50, choices=ELEMENT_TYPE_CHOICES)
-    email_text = models.TextField()
-    image = models.ImageField(upload_to='email_images/', null=True, blank=True)
-    button = models.CharField(max_length=50, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.element_type} - {self.email_template}"
+        return f"{self.created_at}"
 
 
 class SentEmail(models.Model):
