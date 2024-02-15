@@ -1,6 +1,9 @@
 from django.db import models
 from company.models import Company, Departments
 import uuid
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 
 class UseScenario(models.Model):
@@ -53,11 +56,18 @@ class EmailDocument(models.Model):
     email_sents = models.IntegerField(default=0)
     created_at = models.DateField(auto_now_add=True)
 
+    def generate_tracking_url(self, actual_url):
+        tracking_url = reverse('track_click', kwargs={'email_id': urlsafe_base64_encode(
+            force_bytes(self.id)), 'url': urlsafe_base64_encode(force_bytes(actual_url))})
+
+        print('TRACKING URL', tracking_url)
+        return f"http://localhost:8000{tracking_url}"
+
     def __str__(self):
         return f"{self.created_at}"
 
 
-class SentEmail(models.Model):
+class Results(models.Model):
     sender_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     email_document = models.ForeignKey(EmailDocument, on_delete=models.CASCADE)
     department = models.ForeignKey(
@@ -70,6 +80,11 @@ class SentEmail(models.Model):
     image_clicks = models.IntegerField(default=0)
     CTA_clicks = models.IntegerField(default=0)
     reported = models.IntegerField(default=0)
+
+    def record_link_click(self):
+        print('clicked recorded?')
+        self.link_clicks += 1
+        self.save()
 
 
 class News(models.Model):

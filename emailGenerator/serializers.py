@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import EmailDocument, EmailElement, SentEmail, UseScenario, News
+from .models import EmailDocument, EmailElement, Results, UseScenario, News
 
 
 class EmailElementSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class EmailDocumentSerializer(serializers.ModelSerializer):
 
 class SentEmailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SentEmail
+        model = Results
         fields = '__all__'
 
 

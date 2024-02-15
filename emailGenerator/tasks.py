@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from django.conf import settings
-from .models import SentEmail, EmailDocument
+from .models import Results, EmailDocument
 from django.db import transaction
 from django.core.mail import send_mail
 import uuid
@@ -25,7 +25,7 @@ def schedule_email_task(email_object: uuid, email_info: dict):
         )
 
         with transaction.atomic:
-            sent_email = SentEmail.objects.create(
+            sent_email = Results.objects.create(
                 sender_id=email_obj.company,
                 email_document=email_obj,
                 # You may want to adjust this based on your requirements

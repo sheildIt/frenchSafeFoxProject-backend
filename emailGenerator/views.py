@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import EmailDocument, EmailElement, SentEmail, UseScenario, News
+from .models import EmailDocument, EmailElement, Results, UseScenario, News
 from .serializers import EmailDocumentSerializer, EmailElementSerializer, SentEmailSerializer, UseScenarioSerializer
 from django.core.mail import send_mail
 from django.conf import settings
@@ -12,7 +12,10 @@ from .tasks import schedule_email_task
 from datetime import datetime, timedelta
 from .extractor import PromptAnalyzer
 from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, Http404
+from django.shortcuts import redirect
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 
 """Document views"""
 
@@ -116,7 +119,7 @@ def get_sent_emails(request):
     if sender_id is None:
         return Response({'error': 'Sender ID is required'}, status=400)
 
-    sent_emails = SentEmail.objects.filter(sender_id=sender_id)
+    sent_emails = Results.objects.filter(sender_id=sender_id)
     # Use your SentEmail serializer
     serializer = SentEmailSerializer(sent_emails, many=True)
 
@@ -128,28 +131,31 @@ def send_email(request, id):
 
     email_obj = EmailDocument.objects.get(id=id)
     recipient_list = request.data['recipient_list']
+    tracking_url = email_obj.generate_tracking_url(email_obj.friendly_url)
+    email_body = request.data['message'].replace(
+        email_obj.friendly_url, tracking_url)
     try:
         send_mail(
             subject=request.data['subject'],
-            message=request.data['message'],
+            message=email_body,
             # Replace with your sender email
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=recipient_list,
             fail_silently=False,
         )
 
-        with transaction.atomic:
-            sent_email = SentEmail.objects.create(
-                sender_id=email_obj.company,
-                email_document=email_obj,
-                # You may want to adjust this based on your requirements
-                theme=email_obj.email_theme,
-                nr_of_copies=len(recipient_list),
-            )
-
-            email_obj.is_live = True
-            email_obj.save()
-
+        try:
+            with transaction.atomic():
+                sent_email = Results.objects.create(
+                    sender_id=email_obj.company,
+                    email_document=email_obj,
+                    theme=email_obj.email_theme,
+                    nr_of_copies=len(recipient_list),
+                )
+                email_obj.is_live = True
+                email_obj.save()
+        except Exception as e:
+            return Response(f"Error during database operations: {str(e)}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response('Emails sent!')
     except Exception as e:
 
@@ -265,16 +271,18 @@ def keywords_analysis(request, id):
     return Response('Most common keywords:', common_keywords)
 
 
-def track_link(request, tracking_code):
-    # Find the EmailDocument associated with the tracking_code
-    email_document = get_object_or_404(
-        EmailDocument, tracking_link=tracking_code)
+def track_click(request, email_id, url):
+    try:
+        email_id = force_str(urlsafe_base64_decode(email_id))
+        url = force_str(urlsafe_base64_decode(url))
 
-    # Update the click count in the EmailDocument
-    email_document.email_sents += 1
-    email_document.save()
+        email_document = EmailDocument.objects.get(id=email_id)
+        result = Results.objects.get(email_document=email_document)
 
-    # Redirect the user to the destination specified in the EmailDocument
-    # Replace with the actual field storing the destination
-    destination = email_document.link_field
-    return redirect(destination)
+        # Record link click
+        result.record_link_click()
+
+        # Redirect user to the actual target URL
+        return redirect(f'https://www.{url}')
+    except (EmailDocument.DoesNotExist, Results.DoesNotExist):
+        raise Http404("Invalid tracking link")
