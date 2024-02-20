@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from .models import Company, Departments, Employee
-from .serializers import CompanySerializer, DepartmentsSerializer, EmployeeSerializer
+from .models import Company, Departments, Employee, Progress
+from emailGenerator.models import EmailDocument, Results
+from .serializers import CompanySerializer, DepartmentsSerializer, EmployeeSerializer, ProgressSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -98,3 +99,36 @@ def employee_detail(request, company_id, employee_id):
         # Delete a specific employee
         employee.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+"""Progress views"""
+
+
+@api_view(['GET'])
+def get_progress(request, email):
+    progress = Progress.objects.get(employee__email_address=email)
+    serializer = ProgressSerializer(progress)
+
+    return Response({'progress': serializer.data}, status=status.HTTP_200_OK)
+
+
+"""Analytics apis"""
+
+
+@api_view(['GET'])
+def analytics_data(request, id):
+    results = Results.objects.filter(sender_id=id)
+    employees = Employee.objects.filter(company=id).count()
+
+    total_emails_sent = None
+    total_reported_emails = None
+
+    result_values = [result.nr_of_copies for result in results]
+    total_emails_sent = sum(result_values)
+
+    return Response({
+        'total_emails_sent': total_emails_sent,
+        'total_reported_emails': total_reported_emails,
+        'total_employees': employees,
+
+    }, status=status.HTTP_200_OK)

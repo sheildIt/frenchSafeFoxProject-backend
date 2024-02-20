@@ -56,11 +56,10 @@ class EmailDocument(models.Model):
     email_sents = models.IntegerField(default=0)
     created_at = models.DateField(auto_now_add=True)
 
-    def generate_tracking_url(self, actual_url):
+    def generate_tracking_url(self, actual_url, recipient_email):
         tracking_url = reverse('track_click', kwargs={'email_id': urlsafe_base64_encode(
-            force_bytes(self.id)), 'url': urlsafe_base64_encode(force_bytes(actual_url))})
+            force_bytes(self.id)), 'url': urlsafe_base64_encode(force_bytes(actual_url)), 'recipient_email': urlsafe_base64_encode(force_bytes(recipient_email))})
 
-        print('TRACKING URL', tracking_url)
         return f"http://localhost:8000{tracking_url}"
 
     def __str__(self):

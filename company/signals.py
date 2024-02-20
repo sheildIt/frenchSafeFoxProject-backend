@@ -1,4 +1,4 @@
-from .models import Departments, Company, Employee
+from .models import Departments, Company, Employee, Progress
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 
@@ -26,3 +26,9 @@ def update_department_employee_count(sender, instance, **kwargs):
 # Connect the signal to the update_department_employee_count function
 post_save.connect(update_department_employee_count, sender=Employee)
 post_delete.connect(update_department_employee_count, sender=Employee)
+
+
+@receiver(post_save, sender=Employee)
+def create_progress_for_employee(sender, instance, created, **kwargs):
+    if created and not Progress.objects.filter(employee=instance).exists():
+        Progress.objects.create(employee=instance)

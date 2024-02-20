@@ -7,7 +7,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
 import pytz
-from company.models import Company
+from company.models import Company, Progress
 from .tasks import schedule_email_task
 from datetime import datetime, timedelta
 from .extractor import PromptAnalyzer
@@ -131,14 +131,20 @@ def send_email(request, id):
 
     email_obj = EmailDocument.objects.get(id=id)
     recipient_list = request.data['recipient_list']
-    tracking_url = email_obj.generate_tracking_url(email_obj.friendly_url)
+    # tracking_url = email_obj.generate_tracking_url(email_obj.friendly_url)
+
+    for recipient_email in recipient_list:
+        tracking_url = email_obj.generate_tracking_url(
+            email_obj.friendly_url, recipient_email)
+        email_body = request.data['message'].replace(
+            email_obj.friendly_url, tracking_url)
+
     email_body = request.data['message'].replace(
         email_obj.friendly_url, tracking_url)
     try:
         send_mail(
             subject=request.data['subject'],
             message=email_body,
-            # Replace with your sender email
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=recipient_list,
             fail_silently=False,
@@ -271,18 +277,38 @@ def keywords_analysis(request, id):
     return Response('Most common keywords:', common_keywords)
 
 
-def track_click(request, email_id, url):
+def track_click(request, email_id, url, recipient_email):
     try:
         email_id = force_str(urlsafe_base64_decode(email_id))
         url = force_str(urlsafe_base64_decode(url))
 
         email_document = EmailDocument.objects.get(id=email_id)
         result = Results.objects.get(email_document=email_document)
-
+        recipient_email = force_str(urlsafe_base64_decode(recipient_email))
         # Record link click
+        print(recipient_email)
         result.record_link_click()
-
+        if recipient_email:
+            employee_progress = Progress.objects.get(
+                employee__email_address=recipient_email)
+            employee_progress.link_clicks += 1
+            employee_progress.save()
         # Redirect user to the actual target URL
         return redirect(f'https://www.{url}')
     except (EmailDocument.DoesNotExist, Results.DoesNotExist):
         raise Http404("Invalid tracking link")
+
+
+"""API for outlook plugin"""
+
+
+def email_report(request, title):
+    email_document = get_object_or_404(
+        EmailDocument, email_elements__subject_line=title)
+
+    result = Results.objects.get(email_document=email_document.id)
+
+    result.reported += 1
+    result.save()
+
+    return Response('Email reported')

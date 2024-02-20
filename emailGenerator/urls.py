@@ -26,6 +26,9 @@ urlpatterns = [
     # Keywords analysis
     path('keywords_analysis/<str:id>', views.keywords_analysis),
     # link tracking
-    path('track_click/<str:email_id>/<str:url>/',
+    path('track_click/<str:email_id>/<str:url>/<str:recipient_email>',
          views.track_click, name='track_click'),
+
+    # Reporting email
+    path('email_report/<str:title>', views.email_report)
 ]

@@ -46,3 +46,12 @@ class Employee(models.Model):
     @property
     def formatted_date(self):
         return self.date_created.strftime("%Y-%m-%d")
+
+
+class Progress(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    link_clicks = models.IntegerField(default=0)
+    reported = models.IntegerField(default=0)
+    days_streak = models.IntegerField(default=0)
+    level = models.IntegerField(default=0)
+    progress_bar = models.IntegerField(default=0)

@@ -1,4 +1,4 @@
-from .models import Company, Departments, Employee
+from .models import Company, Departments, Employee, Progress
 from rest_framework.serializers import ModelSerializer
 
 
@@ -20,4 +20,12 @@ class EmployeeSerializer(ModelSerializer):
 
     class Meta:
         model = Employee
+        fields = '__all__'
+
+
+class ProgressSerializer(ModelSerializer):
+    employee = EmployeeSerializer()
+
+    class Meta:
+        model = Progress
         fields = '__all__'

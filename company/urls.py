@@ -17,4 +17,10 @@ urlpatterns = [
             EmployeeListView.as_view()),
     path('api/employees/<str:company_id>/<str:employee_id>/',
          views.employee_detail),
+
+    # Progress
+    path('get_progress/<str:email>', views.get_progress),
+
+    # Analytics
+    path('analytics_metrics/<str:id>', views.analytics_data)
 ]
