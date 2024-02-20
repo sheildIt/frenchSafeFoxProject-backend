@@ -7,12 +7,12 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
 import pytz
-from company.models import Company, Progress
+from company.models import Company, Progress, Employee
 from .tasks import schedule_email_task
 from datetime import datetime, timedelta
 from .extractor import PromptAnalyzer
 from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseBadRequest, Http404
+from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.shortcuts import redirect
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -300,15 +300,22 @@ def track_click(request, email_id, url, recipient_email):
 
 
 """API for outlook plugin"""
+@api_view(['POST'])
+def email_report(request):
+    try:
+        email_document = get_object_or_404(
+        EmailDocument, email_elements__email_subjectline=request.data['subject'])
+        result = Results.objects.get(email_document=email_document.id)
+    
+        employee = Employee.objects.get(email_address=request.data['user_email'])
+        if result.employees_reported_list.filter(email_address=employee.email_address).exists():
+            # User already reported this email
+            return Response('You reported this email already!', status=status.HTTP_400_BAD_REQUEST)
 
+        result.employees_reported_list.add(employee)
+        result.reported += 1
+        result.save()
+    except Exception as e:
+        return Response(f"There has been error: {str(e)}")
 
-def email_report(request, title):
-    email_document = get_object_or_404(
-        EmailDocument, email_elements__subject_line=title)
-
-    result = Results.objects.get(email_document=email_document.id)
-
-    result.reported += 1
-    result.save()
-
-    return Response('Email reported')
+    return Response('Email reported',status=status.HTTP_201_CREATED)

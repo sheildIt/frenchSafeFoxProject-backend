@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import EmailDocument, EmailElement, Results, UseScenario, News
-
+from company.serializers import EmployeeSerializer
 
 class EmailElementSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,4 +42,12 @@ class UseScenarioSerializer(serializers.ModelSerializer):
 class NewsSerlizier(serializers.ModelSerializer):
     class Meta:
         model = News
+        fields = '__all__'
+        
+class ResultSerializer(serializers.ModelSerializer):
+    
+    employees_reported_list = EmployeeSerializer(many=True)
+    
+    class Meta:
+        model = Results
         fields = '__all__'

@@ -1,5 +1,5 @@
 from django.db import models
-from company.models import Company, Departments
+from company.models import Company, Departments, Employee
 import uuid
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
@@ -69,6 +69,7 @@ class EmailDocument(models.Model):
 class Results(models.Model):
     sender_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     email_document = models.ForeignKey(EmailDocument, on_delete=models.CASCADE)
+    employees_reported_list = models.ManyToManyField(Employee,blank=True)
     department = models.ForeignKey(
         Departments, on_delete=models.CASCADE, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)

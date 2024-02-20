@@ -35,7 +35,8 @@ CORS_ALLOW_HEADERS = ["accept",
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'https://localhost:3000'
 ]
 
 # Application definition

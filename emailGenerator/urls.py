@@ -30,5 +30,5 @@ urlpatterns = [
          views.track_click, name='track_click'),
 
     # Reporting email
-    path('email_report/<str:title>', views.email_report)
+    path('email_report', views.email_report)
 ]
