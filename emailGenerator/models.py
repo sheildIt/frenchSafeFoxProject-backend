@@ -69,9 +69,7 @@ class EmailDocument(models.Model):
 class Results(models.Model):
     sender_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     email_document = models.ForeignKey(EmailDocument, on_delete=models.CASCADE)
-    employees_reported_list = models.ManyToManyField(Employee,blank=True)
-    department = models.ForeignKey(
-        Departments, on_delete=models.CASCADE, null=True, blank=True)
+    employees_reported_list = models.ManyToManyField(Employee, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     theme = models.CharField(max_length=45)
     nr_of_copies = models.IntegerField(default=0)

@@ -55,3 +55,10 @@ class Progress(models.Model):
     days_streak = models.IntegerField(default=0)
     level = models.IntegerField(default=0)
     progress_bar = models.IntegerField(default=0)
+
+
+class DepartmentProgress(models.Model):
+    department = models.ForeignKey(Departments, on_delete=models.CASCADE)
+    link_clicks = models.IntegerField(default=0)
+    reported = models.IntegerField(default=0)
+    progress_bar = models.IntegerField(default=0)

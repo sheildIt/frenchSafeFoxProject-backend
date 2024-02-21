@@ -125,6 +125,8 @@ def analytics_data(request, id):
 
     result_values = [result.nr_of_copies for result in results]
     total_emails_sent = sum(result_values)
+    reported_values = [result.reported for result in results]
+    total_reported_emails = sum(reported_values)
 
     return Response({
         'total_emails_sent': total_emails_sent,
