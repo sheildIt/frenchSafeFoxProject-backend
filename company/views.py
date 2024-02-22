@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .models import Company, Departments, Employee, Progress
+from .models import Company, Departments, Employee, Progress, DepartmentProgress
 from emailGenerator.models import EmailDocument, Results
-from .serializers import CompanySerializer, DepartmentsSerializer, EmployeeSerializer, ProgressSerializer
+from .serializers import CompanySerializer, DepartmentsSerializer, EmployeeSerializer, ProgressSerializer, DepartmentsProgressSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -110,6 +110,25 @@ def get_progress(request, email):
     serializer = ProgressSerializer(progress)
 
     return Response({'progress': serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_department_progress(request, id):
+    departments = Departments.objects.filter(company=id)
+    department_progress_data = []
+
+    for department in departments:
+        department_progress = DepartmentProgress.objects.get(
+            department=department)
+
+        progress_serializer = DepartmentsProgressSerializer(
+            department_progress)
+
+        department_progress_data.append({
+            'progress': progress_serializer.data,
+        })
+
+    return Response({'department_progress': department_progress_data}, status=status.HTTP_200_OK)
 
 
 """Analytics apis"""

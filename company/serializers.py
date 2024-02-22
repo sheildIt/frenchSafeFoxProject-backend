@@ -1,4 +1,4 @@
-from .models import Company, Departments, Employee, Progress
+from .models import Company, Departments, Employee, Progress, DepartmentProgress
 from rest_framework.serializers import ModelSerializer
 
 
@@ -28,4 +28,12 @@ class ProgressSerializer(ModelSerializer):
 
     class Meta:
         model = Progress
+        fields = '__all__'
+
+
+class DepartmentsProgressSerializer(ModelSerializer):
+    department = DepartmentsSerializer()
+
+    class Meta:
+        model = DepartmentProgress
         fields = '__all__'

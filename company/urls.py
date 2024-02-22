@@ -20,6 +20,7 @@ urlpatterns = [
 
     # Progress
     path('get_progress/<str:email>', views.get_progress),
+    path('get_department_progress/<str:id>', views.get_department_progress),
 
     # Analytics
     path('analytics_metrics/<str:id>', views.analytics_data)

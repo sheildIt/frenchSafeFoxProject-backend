@@ -32,7 +32,7 @@ class Departments(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.department_name
+        return f'{self.department_name}-{self.company.company_name}'
 
 
 class Employee(models.Model):
